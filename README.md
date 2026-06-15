@@ -8,6 +8,21 @@ monitor). One `docker compose up` boots the whole loop on one network and serves
 📐 **Read [`ARCHITECTURE.md`](ARCHITECTURE.md)** for the full picture of what the
 ecosystem is and how the pieces interlink.
 
+## What atlas is — and isn't
+
+atlas is the **conductor**, not the orchestra. It contains **no project code** —
+just the compose file, docs, and a verify script.
+
+- ✅ **Is:** a thin orchestration repo that boots Hermes + Transit + Meridian on
+  one network so they form the self-healing loop, plus the docs that explain it.
+- ❌ **Isn't:** a copy, fork, or merge of the three projects. The actual code —
+  and the integration that makes them talk — lives in each component repo on its
+  own feature branch (see Layout). Delete those siblings and atlas has nothing to
+  build.
+
+So: each project is standalone and runs on its own; the integration code lives in
+each project; atlas just wires the running services together.
+
 ## Layout (important)
 
 This repo only orchestrates; it builds the three component repos, which must be
