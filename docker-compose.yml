@@ -8,7 +8,7 @@ name: ecosystem
 # This is the orchestration repo. It builds the three component repos, which it
 # expects checked out as SIBLINGS of this folder:
 #   Documents/
-#     ai-ecosystem/   <- this repo
+#     atlas/   <- this repo
 #     hermes/         <- context ../hermes
 #     Transit/        <- context ../Transit
 #     meridian/       <- context ../meridian

@@ -1,4 +1,4 @@
-# ai-ecosystem
+# atlas
 
 Orchestration + docs for the self-healing RAG platform built from three repos:
 **Hermes** (async ingestion), **Transit** (AI gateway), **Meridian** (RAG drift
@@ -15,7 +15,7 @@ checked out as **siblings** of this folder:
 
 ```
 Documents/
-  ai-ecosystem/   <- this repo
+  atlas/   <- this repo
   hermes/         (branch: ingestion-bus)
   Transit/        (branch: meridian-telemetry-tap)
   meridian/       (branch: rag-drift-monitor)
