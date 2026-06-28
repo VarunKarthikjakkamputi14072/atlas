@@ -122,7 +122,7 @@ services:
       - redis
       - rag-monitor
 
-  # ---------- Meridian (RAG drift monitor) ----------
+  # ---------- Meridian (RAG drift + vector-store integrity monitor) ----------
   rag-monitor:
     build:
       context: ../meridian
@@ -132,5 +132,32 @@ services:
       MERIDIAN_HERMES_INGEST_URL: http://order-api:8080/api/ingest
       MERIDIAN_DRIFT_CHECK_INTERVAL_S: 3
       MERIDIAN_REEMBED_CHUNK_COUNT: 30
+      MERIDIAN_QDRANT_URL: http://qdrant:6333
+      MERIDIAN_QDRANT_COLLECTION: hermes-chunks
     ports:
       - "8002:8002"
+    depends_on:
+      - qdrant
+
+  # ---------- Observability (watch chaos go red, then heal) ----------
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus

@@ -1,0 +1,84 @@
+{
+  "uid": "atlas-resilience",
+  "title": "Atlas — Resilience",
+  "tags": ["atlas", "chaos"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": { "from": "now-15m", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Vector store points (drops on corruption, climbs on heal)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 16, "x": 0, "y": 0 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15, "lineWidth": 2 } }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "meridian_vectorstore_points", "legendFormat": "points" },
+        { "refId": "B", "expr": "meridian_vectorstore_peak_points", "legendFormat": "peak" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Vector store healthy",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "CORRUPTED", "color": "red" }, "1": { "text": "INTACT", "color": "green" } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+        }
+      },
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [ { "refId": "A", "expr": "meridian_vectorstore_healthy" } ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Self-heals triggered (corruption repairs)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 5, "w": 8, "x": 0, "y": 9 },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "blue" } } },
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [ { "refId": "A", "expr": "meridian_vectorstore_repairs_total" } ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "RAG drift share",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 16, "x": 8, "y": 9 },
+      "fieldConfig": { "defaults": { "min": 0, "max": 1, "custom": { "drawStyle": "line", "fillOpacity": 15, "lineWidth": 2 }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 0.5 } ] } }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "meridian_rag_drift_share", "legendFormat": "drift share" },
+        { "refId": "B", "expr": "meridian_rag_dataset_drift", "legendFormat": "breach" }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Re-embeds (drift)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 14 },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "purple" } } },
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [ { "refId": "A", "expr": "meridian_reembeds_triggered_total" } ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Ingestion jobs processed (by result)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 18 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "bars", "fillOpacity": 40, "lineWidth": 1 } }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (result) (hermes_ingestion_processed_total)", "legendFormat": "{{result}}" }
+      ]
+    }
+  ]
+}

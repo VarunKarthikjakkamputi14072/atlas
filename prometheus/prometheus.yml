@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: order-api
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['order-api:8080']
+
+  - job_name: fulfillment-worker
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['fulfillment-worker:8081']
+
+  - job_name: rag-monitor
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['rag-monitor:8002']

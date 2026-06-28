@@ -80,6 +80,21 @@ All four were verified live end-to-end (2026-06-14): a flood of off-corpus
 queries drove drift share to 1.0, fired exactly one re-embed, and Hermes wrote
 fresh `rag-corpus` vectors into Qdrant.
 
+### A fifth seam: vector-store integrity (chaos engineering)
+
+Drift isn't the only failure mode — the vector store itself can lose data. A
+**vector-store integrity monitor** in Meridian polls Qdrant's point count against
+an auto-calibrated high-water mark; when the count collapses (corruption / data
+loss) it flags the store unhealthy and triggers the same Hermes re-embed to
+rebuild it. Same act-on-the-write-path healing, triggered by data loss instead of
+query drift.
+
+This makes resilience demonstrable, not theoretical. `chaos/corrupt-vectordb.sh`
+deletes most of the vectors; within one monitor cycle `meridian_vectorstore_healthy`
+flips to 0, `meridian_vectorstore_repairs_total` increments, and the corpus
+rebuilds — visible live on the Grafana "Resilience" dashboard. Verified
+2026-06-14: 30 → 6 points → detected → re-embed → climbing back.
+
 ---
 
 ## 5. Branches

@@ -63,6 +63,35 @@ Boots nothing extra — assumes the stack is up — and checks: all services hea
 **real** NVIDIA chat through Transit, a document ingested into **1024-dim** Qdrant
 vectors, and the telemetry tap reaching Meridian. Prints PASS/FAIL per check.
 
+### Chaos engineering — break it, watch it heal 💀
+
+The platform's resilience is only convincing if you can watch it recover. The
+chaos gremlin poisons the vector store; Meridian's integrity monitor detects the
+collapse and triggers a Hermes re-embed to rebuild it — no human, no restart.
+
+```bash
+# (first seed the store, e.g. run verify.sh or ingest a doc, so there's data)
+./chaos/corrupt-vectordb.sh          # deletes 80% of the Qdrant points
+watch -n2 ./chaos/status.sh          # watch points drop, healthy flip to 0, then recover
+```
+Open **Grafana** at http://localhost:3000 → "Atlas — Resilience": the *vector
+store points* panel craters, *healthy* turns red, *self-heals triggered*
+increments, then points climb back as the re-embed rebuilds the corpus.
+
+What you'll see in the metrics:
+```
+before:  points=30  healthy=1  repairs=0
+gremlin: 30 -> 6 points
++3s:     points=6   healthy=0  repairs=1     <- corruption detected, re-embed fired
++9s:     points=16  healthy=1  repairs=1     <- rebuilding
+...      points climb back above the floor
+```
+
+> Note: the re-embed makes one real NVIDIA embedding call per chunk, so on the
+> free tier a large rebuild can rate-limit or stall partway. Lower
+> `MERIDIAN_REEMBED_CHUNK_COUNT` for a snappier demo. The detection + trigger is
+> instant regardless — that's the resilience story.
+
 ### See the self-healing loop (the money shot)
 
 ```bash
